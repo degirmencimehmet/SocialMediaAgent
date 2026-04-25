@@ -8,3 +8,6 @@ __pycache__/
 *.log
 venv/
 .venv/
+*.db
+backend/chroma_db/
+backend/static/images/

@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { Instagram, Check, X, Clock } from 'lucide-react'
+import { Instagram, Check, X, Clock, Eye } from 'lucide-react'
+import PostPreviewModal from './PostPreviewModal'
 
 const STATUS_STYLES = {
   pending:   'badge bg-yellow-100 text-yellow-700',
@@ -17,7 +19,11 @@ const STATUS_LABELS = {
 }
 
 export default function PostCard({ post, onApprove, onReject, loading }) {
+  const [previewing, setPreviewing] = useState(false)
+
   return (
+    <>
+    {previewing && <PostPreviewModal post={post} onClose={() => setPreviewing(false)} />}
     <div className="card p-5 flex flex-col gap-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
@@ -63,24 +69,33 @@ export default function PostCard({ post, onApprove, onReject, loading }) {
       </p>
 
       {/* Actions */}
-      {post.status === 'pending' && (
-        <div className="flex gap-2 pt-1">
-          <button
-            onClick={() => onApprove(post.id)}
-            disabled={loading}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
-          >
-            <Check size={14} /> Onayla
-          </button>
-          <button
-            onClick={() => onReject(post.id)}
-            disabled={loading}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
-          >
-            <X size={14} /> Reddet
-          </button>
-        </div>
-      )}
+      <div className="flex gap-2 pt-1">
+        <button
+          onClick={() => setPreviewing(true)}
+          className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
+        >
+          <Eye size={14} /> Önizle
+        </button>
+        {post.status === 'pending' && (
+          <>
+            <button
+              onClick={() => onApprove(post.id)}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+            >
+              <Check size={14} /> Onayla
+            </button>
+            <button
+              onClick={() => onReject(post.id)}
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
+            >
+              <X size={14} /> Reddet
+            </button>
+          </>
+        )}
+      </div>
     </div>
+    </>
   )
 }

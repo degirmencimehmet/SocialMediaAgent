@@ -27,6 +27,7 @@ class Post(Base):
     prompt = Column(Text, default="")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    image_path = Column(String, nullable=True)           # /static/images/xxx.png
     telegram_message_id = Column(Integer, nullable=True)
     published_at = Column(DateTime, nullable=True)
     instagram_media_id = Column(String, nullable=True)

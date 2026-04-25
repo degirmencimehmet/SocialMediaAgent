@@ -32,6 +32,7 @@ class PostResponse(BaseModel):
     hashtags: list[str]
     post_time: Optional[datetime.datetime]
     image_suggestion: str
+    image_url: Optional[str] = None
     tone: str
     status: str
     prompt: str

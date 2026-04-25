@@ -6,6 +6,7 @@ validated SocialMediaPost. Implements NFR-PERF-03: ≥95% schema compliance.
 import json
 import logging
 import datetime
+import time
 from typing import Optional
 
 import google.generativeai as genai
@@ -83,7 +84,7 @@ class ContentGenerationAgent:
             brand_context, preferred_tone, trending_hashtags, trend_summary
         )
 
-        for attempt in range(2):
+        for attempt in range(3):
             try:
                 response = self._model.generate_content(user_message)
                 raw = response.text.strip()
@@ -98,8 +99,19 @@ class ContentGenerationAgent:
                 return post
             except Exception as e:
                 logger.warning("ContentGenerationAgent attempt %d failed: %s", attempt + 1, e)
-                if attempt == 1:
-                    raise RuntimeError(f"Content generation failed after 2 attempts: {e}")
+                if attempt < 2:
+                    # 429 rate limit — retry_delay'i parse et, yoksa 15sn bekle
+                    wait = 15
+                    msg = str(e)
+                    if "retry_delay" in msg:
+                        import re
+                        m = re.search(r'seconds:\s*(\d+)', msg)
+                        if m:
+                            wait = int(m.group(1)) + 2
+                    logger.info("ContentGenerationAgent: %ds bekleniyor...", wait)
+                    time.sleep(wait)
+                else:
+                    raise RuntimeError(f"Content generation failed after 3 attempts: {e}")
 
     def _build_user_message(
         self, prompt, platform, brand_profile,

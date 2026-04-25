@@ -9,9 +9,12 @@ import datetime
 from contextlib import asynccontextmanager
 from typing import Optional
 
+from pathlib import Path
+
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -65,6 +68,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+_static_dir = Path(__file__).parent / "static"
+_static_dir.mkdir(exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
 
 # ── Post Generation ───────────────────────────────────────────────────────────
@@ -289,6 +296,9 @@ def get_trends(location: str = "Turkey", niche: str = "tourism"):
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _post_to_response(post: Post) -> PostResponse:
+    image_url = None
+    if post.image_path:
+        image_url = f"http://localhost:8000{post.image_path}"
     return PostResponse(
         id=post.id,
         tenant_id=post.tenant_id,
@@ -297,6 +307,7 @@ def _post_to_response(post: Post) -> PostResponse:
         hashtags=post.hashtags_list(),
         post_time=post.post_time,
         image_suggestion=post.image_suggestion or "",
+        image_url=image_url,
         tone=post.tone,
         status=post.status,
         prompt=post.prompt or "",

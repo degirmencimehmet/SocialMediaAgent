@@ -53,7 +53,19 @@ class Orchestrator:
             trend_summary=trend_data["trend_summary"],
         )
 
-        # ── Step 4: Persist to DB ─────────────────────────────────────────────
+        # ── Step 4: Generate Image ────────────────────────────────────────────
+        image_path = None
+        try:
+            from modules.image_generator import generate_image
+            image_path = generate_image(
+                image_suggestion=post_schema.image_suggestion,
+                caption=post_schema.caption,
+                platform=post_schema.platform,
+            )
+        except Exception as e:
+            logger.error("Orchestrator: image generation failed: %s", e)
+
+        # ── Step 5: Persist to DB ─────────────────────────────────────────────
         post = Post(
             tenant_id=tenant_id,
             platform=post_schema.platform,
@@ -61,6 +73,7 @@ class Orchestrator:
             hashtags=json.dumps(post_schema.hashtags),
             post_time=post_schema.post_time,
             image_suggestion=post_schema.image_suggestion,
+            image_path=image_path,
             tone=post_schema.tone,
             status="pending",
             prompt=prompt,
@@ -69,7 +82,7 @@ class Orchestrator:
         db.commit()
         db.refresh(post)
 
-        # ── Step 5: Send to Telegram for approval ────────────────────────────
+        # ── Step 6: Send to Telegram for approval ────────────────────────────
         if send_telegram:
             try:
                 from modules.telegram_bot import send_draft_to_owner
