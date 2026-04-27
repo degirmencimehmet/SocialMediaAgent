@@ -26,6 +26,7 @@ class Orchestrator:
         platform: str = "instagram",
         tone: str | None = None,
         send_telegram: bool = True,
+        generate_image: bool = True,
     ) -> Post:
         """
         Full pipeline: brand → trends → generate → save → telegram delivery.
@@ -53,17 +54,20 @@ class Orchestrator:
             trend_summary=trend_data["trend_summary"],
         )
 
-        # ── Step 4: Generate Image ────────────────────────────────────────────
+        # ── Step 4: Generate Image (optional) ────────────────────────────────
         image_path = None
-        try:
-            from modules.image_generator import generate_image
-            image_path = generate_image(
-                image_suggestion=post_schema.image_suggestion,
-                caption=post_schema.caption,
-                platform=post_schema.platform,
-            )
-        except Exception as e:
-            logger.error("Orchestrator: image generation failed: %s", e)
+        if generate_image:
+            try:
+                from modules.image_generator import generate_image as _gen_image
+                image_path = _gen_image(
+                    image_suggestion=post_schema.image_suggestion,
+                    caption=post_schema.caption,
+                    platform=post_schema.platform,
+                )
+            except Exception as e:
+                logger.error("Orchestrator: image generation failed: %s", e)
+        else:
+            logger.info("Orchestrator: image generation skipped (text-only mode)")
 
         # ── Step 5: Persist to DB ─────────────────────────────────────────────
         post = Post(

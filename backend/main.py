@@ -87,6 +87,7 @@ def generate_post(body: GeneratePostRequest, background_tasks: BackgroundTasks, 
             platform=body.platform,
             tone=body.tone,
             send_telegram=True,
+            generate_image=body.generate_image,
         )
         return _post_to_response(post)
     except Exception as e:

@@ -22,6 +22,7 @@ class GeneratePostRequest(BaseModel):
     prompt: str = Field(..., min_length=5, max_length=500)
     platform: Literal["instagram", "facebook", "tiktok"] = "instagram"
     tone: Optional[Literal["casual", "professional", "festive", "promotional"]] = None
+    generate_image: bool = True
 
 
 class PostResponse(BaseModel):

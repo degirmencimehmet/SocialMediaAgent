@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sparkles, RefreshCw } from 'lucide-react'
+import { Sparkles, RefreshCw, Image, Type } from 'lucide-react'
 import { api } from '../api/client'
 import PostCard from '../components/PostCard'
 import StatCard from '../components/StatCard'
@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [actionLoading, setActionLoading] = useState(false)
   const [prompt, setPrompt] = useState('')
   const [platform, setPlatform] = useState('instagram')
+  const [generateImage, setGenerateImage] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -42,7 +43,7 @@ export default function Dashboard() {
     setError('')
     setSuccess('')
     try {
-      const post = await api.generatePost({ tenant_id: TENANT, prompt, platform })
+      const post = await api.generatePost({ tenant_id: TENANT, prompt, platform, generate_image: generateImage })
       setPosts(prev => [post, ...prev])
       setSuccess('İçerik oluşturuldu! Telegram\'dan onaylayabilirsiniz.')
       setPrompt('')
@@ -116,6 +117,33 @@ export default function Dashboard() {
             rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
           />
+          {/* Image mode toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 font-medium">Post modu:</span>
+            <button
+              type="button"
+              onClick={() => setGenerateImage(true)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border transition-colors ${
+                generateImage
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'
+              }`}
+            >
+              <Image size={14} /> Görsel + Metin
+            </button>
+            <button
+              type="button"
+              onClick={() => setGenerateImage(false)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm border transition-colors ${
+                !generateImage
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'
+              }`}
+            >
+              <Type size={14} /> Sadece Metin
+            </button>
+          </div>
+
           <div className="flex items-center gap-3">
             <select
               value={platform}
